@@ -21,6 +21,7 @@ from flask_appbuilder.models.sqla import Model
 from flask_appbuilder.security.sqla.models import User
 from marshmallow import ValidationError
 
+from superset import db, security_manager
 from superset.commands.base import BaseCommand
 from superset.commands.utils import populate_owners
 from superset.dao.exceptions import DAOCreateFailedError
@@ -44,6 +45,8 @@ class CreateDashboardCommand(BaseCommand):
         try:
             dashboard = DashboardDAO.create(self._properties, commit=False)
             dashboard = DashboardDAO.update_charts_owners(dashboard, commit=True)
+            security_manager.set_permissions_views(dashboard.permission_view_pairs)
+
         except DAOCreateFailedError as ex:
             logger.exception(ex.exception)
             raise DashboardCreateFailedError()

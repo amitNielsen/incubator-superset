@@ -17,7 +17,7 @@
 import json
 import logging
 from copy import copy
-from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
 from urllib import parse
 
 import sqlalchemy as sqla
@@ -505,9 +505,6 @@ if is_feature_enabled("THUMBNAILS_SQLA_LISTENERS"):
 
 
 if is_dashboard_level_access_enabled():
-    sqla.event.listen(
-        Dashboard, "after_insert", DashboardSecurityOrientedDBEventsHandler.after_insert
-    )
     sqla.event.listen(
         Dashboard, "after_update", DashboardSecurityOrientedDBEventsHandler.after_update
     )

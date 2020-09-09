@@ -21,7 +21,7 @@ from typing import Any, List, Optional, Set, Tuple, Type
 from sqlalchemy.engine.base import Connection
 from sqlalchemy.orm.base import NEVER_SET, NO_VALUE
 
-from superset import security_manager
+from superset import db, security_manager
 from superset.constants import Security as SecurityConsts
 
 logger = logging.getLogger(__name__)
@@ -86,14 +86,10 @@ class DashboardSecurityManager:
 
 class DashboardSecurityOrientedDBEventsHandler:
     @staticmethod
-    def after_insert(  # pylint: disable=unused-argument
-        mapper: Any, connection: Connection, target: "Dashboard"  # type: ignore
-    ) -> None:
+    def after_insert(target: "Dashboard") -> None:  # type: ignore
         try:
             logger.info("in after insert on %s %d", target, target.id)
-            security_manager.set_permissions_views(
-                connection, target.permission_view_pairs
-            )
+
         except Exception as ex:
             logger.error(ex)
 
@@ -110,9 +106,7 @@ class DashboardSecurityOrientedDBEventsHandler:
         previous_title = target.previous_title
         new_title = target.dashboard_title
         if target.previous_title in {NEVER_SET, NO_VALUE}:
-            DashboardSecurityOrientedDBEventsHandler.after_insert(
-                mapper, connection, target
-            )
+            DashboardSecurityOrientedDBEventsHandler.after_insert(target)
         elif previous_title and previous_title != new_title:
             new_perm = target.view_name
             old_perm = new_perm.replace(new_title, previous_title)
